@@ -16,11 +16,37 @@ function main() {
             args: [],
             body: 1,
           },
+          y: {
+            free: [],
+            updatable: true,
+            args: [],
+            body: 1,
+          },
         },
         expr: {
           prim: '+#',
-          args: ['x', 1],
+          args: ['x', 'y'],
         },
+      },
+    },
+    fn: {
+      free: [],
+      updatable: false,
+      args: ['x'],
+      body: {
+        expr: {
+          var: 'x',
+          args: [],
+        },
+        alts: [
+          {
+            literal: 0,
+            expr: 0,
+          },
+          {
+            expr: 100,
+          },
+        ],
       },
     },
   };

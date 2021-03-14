@@ -766,6 +766,11 @@ indent-string@^4.0.0:
   resolved "https://registry.yarnpkg.com/indent-string/-/indent-string-4.0.0.tgz#624f8f4497d619b2d9768531d58f4122854d7251"
   integrity sha512-EdDDZu4A2OyIK7Lr/2zG+w5jmbuk1DVBnEwREQvBzspBJkCEbRa8GxU1lghYcaGJCnRWibjDXlq779X1/y5xwg==
 
+infestines@^0.4.10, infestines@^0.4.11:
+  version "0.4.11"
+  resolved "https://registry.yarnpkg.com/infestines/-/infestines-0.4.11.tgz#1d0d164ff1831ffcbafbd02f53bc60140dd52197"
+  integrity sha512-09nHagZLOYUaXKHqdV+nxEaYaD0hRlKyhQMhgTMwfbvWpMkowXf4XLZzAkLq6Y90wZ7Wqm6aMoL2trBsNNKGeg==
+
 inflight@^1.0.4:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/inflight/-/inflight-1.0.6.tgz#49bd6331d7d02d0c09bc910a1075ba8165b56df9"
@@ -1056,6 +1061,21 @@ parse-json@^5.0.0:
     json-parse-even-better-errors "^2.3.0"
     lines-and-columns "^1.1.6"
 
+partial.lenses.validation@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/partial.lenses.validation/-/partial.lenses.validation-2.0.0.tgz#9b518b58a9c2281f375d5e4a5b63464daa3213a2"
+  integrity sha512-NBZhmrunQWc4Ih5pJGYPHCEJfjIITPEkYn0Z6YB8qmW0iN4ZeqN0eZTWAPAH8MxjsEGx3G+8xnTMsEHbzy0k/A==
+  dependencies:
+    infestines "^0.4.10"
+    partial.lenses "^14.0.0"
+
+partial.lenses@^14.0.0:
+  version "14.17.0"
+  resolved "https://registry.yarnpkg.com/partial.lenses/-/partial.lenses-14.17.0.tgz#5a57590668d5dfda6d2f7ac550068c1607e00eff"
+  integrity sha512-Iq+wDw5b5iwmn7b9MO+//buOqF0YoAC2Hsj+HoeG88BGeT3NkL/YwHNGDrySyX7xZSqj0LFEWwfgGSj4cSFmXQ==
+  dependencies:
+    infestines "^0.4.11"
+
 path-is-absolute@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/path-is-absolute/-/path-is-absolute-1.0.1.tgz#174b9268735534ffbc7ace6bf53a5a9e1b5c5f5f"
@@ -1094,6 +1114,14 @@ prettier-linter-helpers@^1.0.0:
   integrity sha512-GbK2cP9nraSSUF9N2XwUwqfzlAFlMNYYl+ShE/V+H8a9uNl/oUqB1w2EL54Jh0OlyRSd8RfWYJ3coVS4TROP2w==
   dependencies:
     fast-diff "^1.1.2"
+
+prettier-printer@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/prettier-printer/-/prettier-printer-1.1.4.tgz#de61e2188ea61b4c162948b16aabf4cd18f2d331"
+  integrity sha512-gQIWF7PKVknRcMoZ4Lsqj2icc97W+Q9JTa7xQgNem07yZFzOimUPq50N5oRfKkSRBZT8QqrVW1IBEMBPWqjBgQ==
+  dependencies:
+    infestines "^0.4.11"
+    partial.lenses.validation "^2.0.0"
 
 prettier@^2.2.1:
   version "2.2.1"

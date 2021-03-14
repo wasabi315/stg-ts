@@ -25,5 +25,8 @@
     "*.ts": [
       "yarn lint:fix"
     ]
+  },
+  "dependencies": {
+    "prettier-printer": "^1.1.4"
   }
 }
