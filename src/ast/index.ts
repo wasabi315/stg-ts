@@ -1,6 +1,6 @@
 export type Program = Binds;
 
-export type Binds = Map<Var, LambdaForm>;
+export type Binds = Record<Var, LambdaForm>;
 
 export type LambdaForm = {
   free: Var[];
@@ -108,6 +108,6 @@ export const isVar = (atom: Atom): atom is Var => {
 export const isLiteral: {
   (expr: Expr): expr is Literal;
   (atom: Atom): atom is Literal;
-} = (x: any): x is Literal => {
+} = (x: unknown): x is Literal => {
   return typeof x === 'number';
 };
