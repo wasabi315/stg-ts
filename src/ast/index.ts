@@ -6,7 +6,7 @@ export type LambdaForm = {
   free: Var[];
   updatable: boolean;
   args: Var[];
-  body: Expr;
+  expr: Expr;
 };
 
 export type Expr = Let | Case | VarApp | ConstrApp | PrimApp | Literal;

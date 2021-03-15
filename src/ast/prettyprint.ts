@@ -5,6 +5,8 @@ export const prettyprint = (program: ast.Program): string => {
   return pp.render(0, ppBinds(program));
 };
 
+const TAB_SIZE = 4;
+
 const ppBinds = (binds: ast.Binds): pp.IDoc => {
   return pp.intersperse(
     pp.prepend(pp.line, pp.line),
@@ -24,7 +26,7 @@ const ppLambdaForm = (lf: ast.LambdaForm): pp.IDoc => {
       ppVars(lf.args),
       '->',
     ]),
-    pp.indent(4, ppExpr(lf.body)),
+    pp.indent(TAB_SIZE, ppExpr(lf.expr)),
   ]);
 };
 
@@ -32,16 +34,16 @@ const ppExpr = (expr: ast.Expr): pp.IDoc => {
   if (ast.isLet(expr)) {
     return pp.intersperse(pp.line, [
       expr.rec ? 'letrec' : 'let',
-      pp.indent(4, ppBinds(expr.binds)),
+      pp.indent(TAB_SIZE, ppBinds(expr.binds)),
       'in',
-      pp.indent(4, ppExpr(expr.expr)),
+      pp.indent(TAB_SIZE, ppExpr(expr.expr)),
     ]);
   }
 
   if (ast.isCase(expr)) {
     return pp.intersperse(pp.line, [
       pp.intersperse(' ', ['case', ppExpr(expr.expr), 'of']),
-      pp.indent(4, ppAlts(expr.alts)),
+      pp.indent(TAB_SIZE, ppAlts(expr.alts)),
     ]);
   }
 
@@ -83,7 +85,7 @@ const ppAlt = (alt: ast.Alt): pp.IDoc => {
 
   return pp.intersperse(pp.line, [
     pp.intersperse(' ', [pattern, '->']),
-    pp.indent(4, ppExpr(alt.expr)),
+    pp.indent(TAB_SIZE, ppExpr(alt.expr)),
   ]);
 };
 
