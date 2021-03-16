@@ -267,6 +267,23 @@ const evalConstrApp: Rule = ({ code, args, returns, updates, globals }) => {
   };
 };
 
+const takenAlt: {
+  (alts: ast.Alt[], constr: ast.Constr): ast.Alt | undefined;
+  (alts: ast.Alt[], literal: ast.Literal): ast.Alt | undefined;
+} = (alts: ast.Alt[], x: string | number): ast.Alt | undefined => {
+  const taken = (alt: ast.Alt): boolean => {
+    return (
+      (typeof x === 'string'
+        ? ast.isAlgAlt(alt) && alt.constr === x
+        : ast.isPrimAlt(alt) && alt.literal === x) ||
+      ast.isDefAlt(alt) ||
+      ast.isVarAlt(alt)
+    );
+  };
+
+  return alts.find(taken);
+};
+
 const returnConMatched: Rule = ({ code, args, returns, updates, globals }) => {
   if (!isReturnCon(code) || returns.length === 0) {
     return null;
@@ -275,10 +292,8 @@ const returnConMatched: Rule = ({ code, args, returns, updates, globals }) => {
   const rframe = returns[0];
   returns = returns.slice(1);
 
-  const alt = rframe.alts.find(
-    (alt) => ast.isAlgAlt(alt) && alt.constr === code.constr
-  ) as ast.AlgAlt | undefined;
-  if (alt === undefined) {
+  const alt = takenAlt(rframe.alts, code.constr);
+  if (alt === undefined || !ast.isAlgAlt(alt)) {
     return null;
   }
 
@@ -304,20 +319,13 @@ const returnConDefault: Rule = ({ code, args, returns, updates, globals }) => {
   const rframe = returns[0];
   returns = returns.slice(1);
 
-  let dalt!: ast.DefAlt;
-  for (const alt of rframe.alts) {
-    if (
-      (ast.isAlgAlt(alt) && alt.constr === code.constr) ||
-      !ast.isDefAlt(alt)
-    ) {
-      return null;
-    }
-    dalt = alt;
-    break;
+  const alt = takenAlt(rframe.alts, code.constr);
+  if (alt === undefined || !ast.isDefAlt(alt)) {
+    return null;
   }
 
   return {
-    code: { expr: dalt.expr, locals: rframe.env },
+    code: { expr: alt.expr, locals: rframe.env },
     args,
     returns,
     updates,
@@ -339,16 +347,9 @@ const returnConDefaultWithBind: Rule = ({
   const rframe = returns[0];
   returns = returns.slice(1);
 
-  let valt!: ast.VarAlt;
-  for (const alt of rframe.alts) {
-    if (
-      (ast.isAlgAlt(alt) && alt.constr === code.constr) ||
-      !ast.isVarAlt(alt)
-    ) {
-      return null;
-    }
-    valt = alt;
-    break;
+  const alt = takenAlt(rframe.alts, code.constr);
+  if (alt === undefined || !ast.isVarAlt(alt)) {
+    return null;
   }
 
   const free = Array.from(
@@ -368,10 +369,10 @@ const returnConDefaultWithBind: Rule = ({
     free: code.args,
   };
 
-  const locals = { ...rframe.env, [valt.var]: closure };
+  const locals = { ...rframe.env, [alt.var]: closure };
 
   return {
-    code: { expr: valt.expr, locals },
+    code: { expr: alt.expr, locals },
     args,
     returns,
     updates,
@@ -420,10 +421,8 @@ const returnIntMatched: Rule = ({ code, args, returns, updates, globals }) => {
   const rframe = returns[0];
   returns = returns.slice(1);
 
-  const alt = rframe.alts.find(
-    (alt) => ast.isPrimAlt(alt) && alt.literal === code.int
-  ) as ast.PrimAlt | undefined;
-  if (alt === undefined) {
+  const alt = takenAlt(rframe.alts, code.int);
+  if (alt === undefined || !ast.isPrimAlt(alt)) {
     return null;
   }
 
@@ -444,19 +443,13 @@ const returnIntDefault: Rule = ({ code, args, returns, updates, globals }) => {
   const rframe = returns[0];
   returns = returns.slice(1);
 
-  let dalt!: ast.DefAlt;
-  for (const alt of rframe.alts) {
-    if (
-      (ast.isPrimAlt(alt) && alt.literal !== code.int) ||
-      !ast.isDefAlt(alt)
-    ) {
-      return null;
-    }
-    dalt = alt;
+  const alt = takenAlt(rframe.alts, code.int);
+  if (alt === undefined || !ast.isDefAlt(alt)) {
+    return null;
   }
 
   return {
-    code: { expr: dalt.expr, locals: rframe.env },
+    code: { expr: alt.expr, locals: rframe.env },
     args,
     returns,
     updates,
@@ -478,22 +471,15 @@ const returnIntDefaultWithBind: Rule = ({
   const rframe = returns[0];
   returns = returns.slice(1);
 
-  let valt!: ast.VarAlt;
-  for (const alt of rframe.alts) {
-    if (
-      (ast.isPrimAlt(alt) && alt.literal === code.int) ||
-      !ast.isVarAlt(alt)
-    ) {
-      return null;
-    }
-    valt = alt;
-    break;
+  const alt = takenAlt(rframe.alts, code.int);
+  if (alt === undefined || !ast.isVarAlt(alt)) {
+    return null;
   }
 
-  const locals = { ...rframe.env, [valt.var]: code.int };
+  const locals = { ...rframe.env, [alt.var]: code.int };
 
   return {
-    code: { expr: valt.expr, locals },
+    code: { expr: alt.expr, locals },
     args,
     returns,
     updates,
