@@ -1,175 +1,102 @@
 import * as ast from '~/ast';
 import { prettyprint } from '~/ast/prettyprint';
+import { createInterpreter } from '~/interpreter';
 
-function main() {
+async function main() {
   const program: ast.Program = {
-    map: {
+    main: {
       free: [],
       updatable: false,
-      args: ['f', 'xs'],
+      args: [],
+      expr: {
+        rec: true,
+        binds: {
+          x: {
+            free: [],
+            updatable: false,
+            args: [],
+            expr: {
+              constr: 'Int#',
+              args: [1],
+            },
+          },
+          y: {
+            free: [],
+            updatable: false,
+            args: [],
+            expr: {
+              constr: 'Int#',
+              args: [1],
+            },
+          },
+          z: {
+            free: ['x', 'y'],
+            updatable: false,
+            args: [],
+            expr: {
+              var: 'add',
+              args: ['x', 'y'],
+            },
+          },
+        },
+        expr: {
+          var: 'add',
+          args: ['z', 'z'],
+        },
+      },
+    },
+    add: {
+      free: [],
+      updatable: false,
+      args: ['x', 'y'],
       expr: {
         expr: {
-          var: 'xs',
+          var: 'x',
           args: [],
         },
         alts: [
           {
-            constr: 'Nil',
-            vars: [],
-            expr: {
-              constr: 'Nil',
-              args: [],
-            },
-          },
-          {
-            constr: 'Cons',
-            vars: ['y', 'ys'],
-            expr: {
-              rec: false,
-              binds: {
-                fy: {
-                  free: ['f', 'y'],
-                  updatable: true,
-                  args: [],
-                  expr: {
-                    var: 'f',
-                    args: ['y'],
-                  },
-                },
-                mfy: {
-                  free: ['f', 'ys'],
-                  updatable: true,
-                  args: [],
-                  expr: {
-                    var: 'map',
-                    args: ['f', 'ys'],
-                  },
-                },
-              },
-              expr: {
-                constr: 'Cons',
-                args: ['fy', 'mfy'],
-              },
-            },
-          },
-        ],
-      },
-    },
-    map1: {
-      free: [],
-      updatable: false,
-      args: ['f'],
-      expr: {
-        rec: true,
-        binds: {
-          mf: {
-            free: ['f', 'mf'],
-            updatable: false,
-            args: ['xs'],
+            constr: 'Int#',
+            vars: ['x#'],
             expr: {
               expr: {
-                var: 'xs',
+                var: 'y',
                 args: [],
               },
               alts: [
                 {
-                  constr: 'Nil',
-                  vars: [],
+                  constr: 'Int#',
+                  vars: ['y#'],
                   expr: {
-                    constr: 'Nil',
-                    args: [],
-                  },
-                },
-                {
-                  constr: 'Cons',
-                  vars: ['y', 'ys'],
-                  expr: {
-                    rec: false,
-                    binds: {
-                      fy: {
-                        free: ['f', 'y'],
-                        updatable: true,
-                        args: [],
-                        expr: {
-                          var: 'f',
-                          args: ['y'],
-                        },
-                      },
-                      mfys: {
-                        free: ['mf', 'ys'],
-                        updatable: true,
-                        args: [],
-                        expr: {
-                          var: 'mf',
-                          args: ['ys'],
-                        },
-                      },
-                    },
                     expr: {
-                      constr: 'Cons',
-                      args: ['fy', 'mfys'],
+                      prim: '+#',
+                      args: ['x#', 'y#'],
                     },
+                    alts: [
+                      {
+                        var: 'z#',
+                        expr: {
+                          constr: 'Int#',
+                          args: ['z#'],
+                        },
+                      },
+                    ],
                   },
                 },
               ],
             },
           },
-        },
-        expr: {
-          var: 'mf',
-          args: [],
-        },
-      },
-    },
-    const: {
-      free: [],
-      updatable: false,
-      args: ['x', 'y'],
-      expr: {
-        var: 'x',
-        args: [],
-      },
-    },
-    compose: {
-      free: [],
-      updatable: false,
-      args: ['f', 'g'],
-      expr: {
-        rec: false,
-        binds: {
-          fg: {
-            free: ['f', 'g'],
-            updatable: false,
-            args: ['x'],
-            expr: {
-              rec: false,
-              binds: {
-                gx: {
-                  free: ['g', 'x'],
-                  updatable: true,
-                  args: [],
-                  expr: {
-                    var: 'g',
-                    args: ['x'],
-                  },
-                },
-              },
-              expr: {
-                var: 'f',
-                args: ['gx'],
-              },
-            },
-          },
-        },
-        expr: {
-          var: 'fg',
-          args: [],
-        },
+        ],
       },
     },
   };
 
   console.log(prettyprint(program));
+
+  const interpreter = createInterpreter(program);
+  for (const state of interpreter) {
+    console.log(state);
+  }
 }
 
 main();
