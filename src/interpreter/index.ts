@@ -19,7 +19,7 @@ const createInitialState = (program: ast.Program): State => {
   const globals: Env = {};
 
   [...Object.entries(program)].forEach(([v, lf]) => {
-    globals[v] = { lf, free: [] };
+    globals[v] = { lf, free: [], updating: false };
   });
   [...Object.entries(program)].forEach(([v, lf]) => {
     (globals[v] as Addr).free.push(...vals({}, globals, lf.free));
@@ -80,6 +80,7 @@ type UpdateStack = {
 type Closure = {
   lf: ast.LambdaForm;
   free: Value[];
+  updating: boolean;
 };
 
 type Addr = Closure;
@@ -221,7 +222,7 @@ const evalLet: Rule = ({ code, args, returns, updates, globals }) => {
 
   const locals = { ...code.locals };
   [...Object.entries(code.expr.binds)].forEach(([v, lf]) => {
-    locals[v] = { lf, free: [] };
+    locals[v] = { lf, free: [], updating: false };
   });
   const localsRhs = code.expr.rec ? locals : code.locals;
   [...Object.entries(code.expr.binds)].forEach(([v, lf]) => {
@@ -370,6 +371,7 @@ const returnConDefaultWithBind: Rule = ({
       },
     },
     free: code.args,
+    updating: false,
   };
 
   const locals = { ...rframe.env, [alt.var]: closure };
@@ -532,10 +534,8 @@ const enterUpdatable: Rule = ({ code, args, returns, updates, globals }) => {
     return null;
   }
 
-  for (const { addr } of updates) {
-    if (code.addr === addr) {
-      throw Error('<<loop>>');
-    }
+  if (code.addr.updating) {
+    throw Error('<<loop>>');
   }
 
   const locals: Env = {};
@@ -544,6 +544,7 @@ const enterUpdatable: Rule = ({ code, args, returns, updates, globals }) => {
   });
 
   updates = [{ args, returns, addr: code.addr }, ...updates];
+  code.addr.updating = true;
 
   return {
     code: { expr: code.addr.lf.expr, locals },
@@ -581,6 +582,7 @@ const returnConRestore: Rule = ({ code, args, returns, updates, globals }) => {
     },
   };
   uframe.addr.free = code.args;
+  uframe.addr.updating = false;
 
   return {
     code,
