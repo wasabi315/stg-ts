@@ -106,5 +106,5 @@ const ppAtoms = (atoms: ast.Atom[]): pp.IDoc => {
 };
 
 const ppLiteral = (literal: ast.Literal): pp.IDoc => {
-  return String(literal);
+  return `${literal}#`;
 };
