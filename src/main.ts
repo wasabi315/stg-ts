@@ -6,14 +6,14 @@ async function main() {
   const program: ast.Program = {
     main: {
       free: [],
-      updatable: false,
+      updatable: true,
       args: [],
       expr: {
         rec: true,
         binds: {
           x: {
             free: [],
-            updatable: false,
+            updatable: true,
             args: [],
             expr: {
               constr: 'Int#',
@@ -22,7 +22,7 @@ async function main() {
           },
           y: {
             free: [],
-            updatable: false,
+            updatable: true,
             args: [],
             expr: {
               constr: 'Int#',
@@ -31,7 +31,7 @@ async function main() {
           },
           z: {
             free: ['x', 'y'],
-            updatable: false,
+            updatable: true,
             args: [],
             expr: {
               var: 'add',
@@ -95,7 +95,7 @@ async function main() {
 
   const interpreter = createInterpreter(program);
   for (const state of interpreter) {
-    console.log(state);
+    console.dir(state, { depth: null });
   }
 }
 

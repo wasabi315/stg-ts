@@ -146,6 +146,9 @@ const transition = (state: State): State | null => {
     returnIntDefault,
     returnIntDefaultWithBind,
     evalPrimApp,
+    enterUpdatable,
+    returnConRestore,
+    enterParApp,
   ];
 
   for (const rule of rules) {
@@ -354,7 +357,7 @@ const returnConDefaultWithBind: Rule = ({
 
   const free = Array.from(
     { length: code.args.length },
-    () => `fresh__${uuidv4()}`
+    () => `fresh_${uuidv4()}`
   );
   const closure: Closure = {
     lf: {
@@ -519,6 +522,97 @@ const evalPrimApp: Rule = ({ code, args, returns, updates, globals }) => {
     code: { int: i },
     args,
     returns,
+    updates,
+    globals,
+  };
+};
+
+const enterUpdatable: Rule = ({ code, args, returns, updates, globals }) => {
+  if (!isEnter(code) || !code.addr.lf.updatable) {
+    return null;
+  }
+
+  const locals: Env = {};
+  code.addr.lf.free.forEach((v, i) => {
+    locals[v] = code.addr.free[i];
+  });
+
+  updates = [{ args, returns, addr: code.addr }, ...updates];
+
+  return {
+    code: { expr: code.addr.lf.expr, locals },
+    args: [],
+    returns: [],
+    updates,
+    globals,
+  };
+};
+
+const returnConRestore: Rule = ({ code, args, returns, updates, globals }) => {
+  if (
+    !isReturnCon(code) ||
+    args.length !== 0 ||
+    returns.length !== 0 ||
+    updates.length === 0
+  ) {
+    return null;
+  }
+
+  const uframe = updates[0];
+  updates = updates.slice(1);
+
+  const free = Array.from(
+    { length: code.args.length },
+    () => `fresh_${uuidv4()}`
+  );
+  uframe.addr.lf = {
+    free,
+    updatable: false,
+    args: [],
+    expr: {
+      constr: code.constr,
+      args: free,
+    },
+  };
+  uframe.addr.free = code.args;
+
+  return {
+    code,
+    args: uframe.args,
+    returns: uframe.returns,
+    updates,
+    globals,
+  };
+};
+
+const enterParApp: Rule = ({ code, args, updates, globals }) => {
+  if (!isEnter(code) || updates.length === 0) {
+    return null;
+  }
+
+  const closure = code.addr;
+  if (closure.lf.updatable || args.length >= closure.lf.args.length) {
+    return null;
+  }
+
+  const uframe = updates[0];
+  updates = updates.slice(1);
+
+  const args1 = closure.lf.args.slice(0, args.length);
+  const args2 = closure.lf.args.slice(args.length);
+
+  uframe.addr.lf = {
+    free: [...closure.lf.free, ...args1],
+    updatable: false,
+    args: args2,
+    expr: uframe.addr.lf.expr,
+  };
+  uframe.addr.free = [...uframe.addr.free, ...args];
+
+  return {
+    code: { addr: closure },
+    args: [...args, ...uframe.args],
+    returns: uframe.returns,
     updates,
     globals,
   };
