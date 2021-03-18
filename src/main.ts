@@ -113,7 +113,7 @@ const program2: ast.Program = {
           args: [],
           expr: {
             var: 'const',
-            args: ['one'],
+            args: ['1'],
           },
         },
       },
@@ -294,6 +294,190 @@ const program3: ast.Program = {
   },
 };
 
+const program4: ast.Program = {
+  main: {
+    free: [],
+    updatable: true,
+    args: [],
+    expr: {
+      rec: false,
+      binds: {
+        ['10']: {
+          free: [],
+          updatable: true,
+          args: [],
+          expr: {
+            constr: 'Int#',
+            args: [10],
+          },
+        },
+      },
+      expr: {
+        var: 'fact',
+        args: ['10'],
+      },
+    },
+  },
+  ['*']: {
+    free: [],
+    updatable: false,
+    args: ['x', 'y'],
+    expr: {
+      expr: {
+        var: 'x',
+        args: [],
+      },
+      alts: [
+        {
+          constr: 'Int#',
+          vars: ['x#'],
+          expr: {
+            expr: {
+              var: 'y',
+              args: [],
+            },
+            alts: [
+              {
+                constr: 'Int#',
+                vars: ['y#'],
+                expr: {
+                  expr: {
+                    prim: '*#',
+                    args: ['x#', 'y#'],
+                  },
+                  alts: [
+                    {
+                      var: 'z#',
+                      expr: {
+                        constr: 'Int#',
+                        args: ['z#'],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+  ['-']: {
+    free: [],
+    updatable: false,
+    args: ['x', 'y'],
+    expr: {
+      expr: {
+        var: 'x',
+        args: [],
+      },
+      alts: [
+        {
+          constr: 'Int#',
+          vars: ['x#'],
+          expr: {
+            expr: {
+              var: 'y',
+              args: [],
+            },
+            alts: [
+              {
+                constr: 'Int#',
+                vars: ['y#'],
+                expr: {
+                  expr: {
+                    prim: '-#',
+                    args: ['x#', 'y#'],
+                  },
+                  alts: [
+                    {
+                      var: 'z#',
+                      expr: {
+                        constr: 'Int#',
+                        args: ['z#'],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+  fact: {
+    free: [],
+    updatable: false,
+    args: ['n'],
+    expr: {
+      expr: {
+        var: 'n',
+        args: [],
+      },
+      alts: [
+        {
+          constr: 'Int#',
+          vars: ['n#'],
+          expr: {
+            expr: {
+              var: 'n#',
+              args: [],
+            },
+            alts: [
+              {
+                literal: 0,
+                expr: {
+                  constr: 'Int#',
+                  args: [1],
+                },
+              },
+              {
+                expr: {
+                  rec: true,
+                  binds: {
+                    ['1']: {
+                      free: [],
+                      updatable: true,
+                      args: [],
+                      expr: {
+                        constr: 'Int#',
+                        args: [1],
+                      },
+                    },
+                    m: {
+                      free: ['n', '1'],
+                      updatable: true,
+                      args: [],
+                      expr: {
+                        var: '-',
+                        args: ['n', '1'],
+                      },
+                    },
+                    fm: {
+                      free: ['m'],
+                      updatable: true,
+                      args: [],
+                      expr: {
+                        var: 'fact',
+                        args: ['m'],
+                      },
+                    },
+                  },
+                  expr: {
+                    var: '*',
+                    args: ['n', 'fm'],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+};
+
 async function main(program: ast.Program) {
   console.log(prettyprint(program));
 
@@ -303,4 +487,4 @@ async function main(program: ast.Program) {
   }
 }
 
-main(program3);
+main(program2);
