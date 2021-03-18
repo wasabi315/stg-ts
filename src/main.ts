@@ -478,13 +478,87 @@ const program4: ast.Program = {
   },
 };
 
-async function main(program: ast.Program) {
+const program5: ast.Program = {
+  main: {
+    free: [],
+    updatable: true,
+    args: [],
+    expr: {
+      rec: false,
+      binds: {
+        ['1']: {
+          free: [],
+          updatable: true,
+          args: [],
+          expr: {
+            constr: 'Int#',
+            args: [1],
+          },
+        },
+      },
+      expr: {
+        var: '+',
+        args: ['1', 'main'],
+      },
+    },
+  },
+  ['+']: {
+    free: [],
+    updatable: false,
+    args: ['x', 'y'],
+    expr: {
+      expr: {
+        var: 'x',
+        args: [],
+      },
+      alts: [
+        {
+          constr: 'Int#',
+          vars: ['x#'],
+          expr: {
+            expr: {
+              var: 'y',
+              args: [],
+            },
+            alts: [
+              {
+                constr: 'Int#',
+                vars: ['y#'],
+                expr: {
+                  expr: {
+                    prim: '+#',
+                    args: ['x#', 'y#'],
+                  },
+                  alts: [
+                    {
+                      var: 'z#',
+                      expr: {
+                        constr: 'Int#',
+                        args: ['z#'],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+};
+
+function main(program: ast.Program) {
   console.log(prettyprint(program));
 
   const interpreter = createInterpreter(program);
-  for (const state of interpreter) {
-    console.dir(state, { depth: null });
+  try {
+    for (const state of interpreter) {
+      console.dir(state, { depth: null });
+    }
+  } catch (err: unknown) {
+    console.error('Program exited with error: ', (err as Error).message);
   }
 }
 
-main(program2);
+main(program5);

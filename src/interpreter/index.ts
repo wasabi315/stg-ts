@@ -532,6 +532,12 @@ const enterUpdatable: Rule = ({ code, args, returns, updates, globals }) => {
     return null;
   }
 
+  for (const { addr } of updates) {
+    if (code.addr === addr) {
+      throw Error('<<loop>>');
+    }
+  }
+
   const locals: Env = {};
   code.addr.lf.free.forEach((v, i) => {
     locals[v] = code.addr.free[i];
