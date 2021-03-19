@@ -561,4 +561,4 @@ function main(program: ast.Program) {
   }
 }
 
-main(program5);
+main(program4);

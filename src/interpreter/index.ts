@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import * as ast from '~/ast';
 
 export function* createInterpreter(program: ast.Program): Generator<State> {
@@ -127,6 +127,10 @@ const val = (local: Env, global: Env, atom: ast.Atom): Value => {
 
 const vals = (local: Env, global: Env, atoms: ast.Atom[]): Value[] => {
   return atoms.map((atom) => val(local, global, atom));
+};
+
+const genFreshVar = (): string => {
+  return `fresh_${crypto.randomBytes(4).toString('hex')}`;
 };
 
 type Rule = (state: State) => State | null;
@@ -356,10 +360,7 @@ const returnConDefaultWithBind: Rule = ({
     return null;
   }
 
-  const free = Array.from(
-    { length: code.args.length },
-    () => `fresh_${uuidv4()}`
-  );
+  const free = Array.from({ length: code.args.length }, genFreshVar);
   const closure: Closure = {
     lf: {
       free,
@@ -568,10 +569,7 @@ const returnConRestore: Rule = ({ code, args, returns, updates, globals }) => {
   const uframe = updates[0];
   updates = updates.slice(1);
 
-  const free = Array.from(
-    { length: code.args.length },
-    () => `fresh_${uuidv4()}`
-  );
+  const free = Array.from({ length: code.args.length }, genFreshVar);
   uframe.addr.lf = {
     free,
     updatable: false,
