@@ -1,0 +1,100 @@
+{
+  "main": {
+    "free": [],
+    "updatable": true,
+    "args": [],
+    "expr": {
+      "var": "fix",
+      "args": [
+        "fact",
+        10
+      ]
+    }
+  },
+  "fact": {
+    "free": [],
+    "updatable": false,
+    "args": [
+      "f",
+      "n#"
+    ],
+    "expr": {
+      "expr": {
+        "var": "n#",
+        "args": []
+      },
+      "alts": [
+        {
+          "literal": 0,
+          "expr": 1
+        },
+        {
+          "expr": {
+            "expr": {
+              "prim": "-#",
+              "args": [
+                "n#",
+                1
+              ]
+            },
+            "alts": [
+              {
+                "var": "m#",
+                "expr": {
+                  "expr": {
+                    "var": "f",
+                    "args": [
+                      "m#"
+                    ]
+                  },
+                  "alts": [
+                    {
+                      "var": "fm#",
+                      "expr": {
+                        "prim": "*#",
+                        "args": [
+                          "n#",
+                          "fm#"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "fix": {
+    "free": [],
+    "updatable": false,
+    "args": [
+      "f"
+    ],
+    "expr": {
+      "rec": true,
+      "binds": {
+        "x": {
+          "free": [
+            "f",
+            "x"
+          ],
+          "updatable": true,
+          "args": [],
+          "expr": {
+            "var": "f",
+            "args": [
+              "x"
+            ]
+          }
+        }
+      },
+      "expr": {
+        "var": "x",
+        "args": []
+      }
+    }
+  }
+}

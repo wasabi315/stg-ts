@@ -34,7 +34,7 @@ const createInitialState = (program: ast.Program): State => {
   };
 };
 
-type State = {
+export type State = {
   code: Code;
   args: ArgStack;
   returns: ReturnStack;
@@ -611,9 +611,9 @@ const enterParApp: Rule = ({ code, args, updates, globals }) => {
     free: [...closure.lf.free, ...args1],
     updatable: false,
     args: args2,
-    expr: uframe.addr.lf.expr,
+    expr: closure.lf.expr,
   };
-  uframe.addr.free = [...uframe.addr.free, ...args];
+  uframe.addr.free = [...closure.free, ...args];
 
   return {
     code: { addr: closure },
