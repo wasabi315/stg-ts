@@ -4,10 +4,23 @@
     "updatable": true,
     "args": [],
     "expr": {
-      "var": "fix",
-      "args": [
-        "fact",
-        10
+      "expr": {
+        "var": "fix",
+        "args": [
+          "fact",
+          10
+        ]
+      },
+      "alts": [
+        {
+          "var": "fact10#",
+          "expr": {
+            "constr": "Int#",
+            "args": [
+              "fact10#"
+            ]
+          }
+        }
       ]
     }
   },
