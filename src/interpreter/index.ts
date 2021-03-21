@@ -66,16 +66,20 @@ type Env = Record<ast.Var, Value>;
 
 type ArgStack = Value[];
 
-type ReturnStack = {
+type Continuation = {
   env: Env;
   alts: ast.Alt[];
-}[];
+};
 
-type UpdateStack = {
+type ReturnStack = Continuation[];
+
+type UpdateFrame = {
   args: ArgStack;
   returns: ReturnStack;
   addr: Addr;
-}[];
+};
+
+type UpdateStack = UpdateFrame[];
 
 type Closure = {
   lf: ast.LambdaForm;
@@ -133,6 +137,10 @@ const genFreshVar = (): string => {
   return `fresh_${crypto.randomBytes(4).toString('hex')}`;
 };
 
+const splitAt = <T>(ix: number, arr: T[]): [T[], T[]] => {
+  return [arr.slice(0, ix), arr.slice(ix)];
+};
+
 type Rule = (state: State) => State | null;
 
 const transition = (state: State): State | null => {
@@ -178,11 +186,9 @@ const evalVarApp: Rule = ({ code, args, returns, updates, globals }) => {
     return null;
   }
 
-  args = [...vals(code.locals, globals, code.expr.args), ...args];
-
   return {
     code: { addr: v },
-    args,
+    args: [...vals(code.locals, globals, code.expr.args), ...args],
     returns,
     updates,
     globals,
@@ -199,8 +205,7 @@ const enterNonUpdatable: Rule = ({ code, args, returns, updates, globals }) => {
     return null;
   }
 
-  const closureArgs = args.slice(0, closure.lf.args.length);
-  args = args.slice(closure.lf.args.length);
+  const [closureArgs, nextArgs] = splitAt(closure.lf.args.length, args);
 
   const locals: Env = {};
   closure.lf.args.forEach((v, i) => {
@@ -212,7 +217,7 @@ const enterNonUpdatable: Rule = ({ code, args, returns, updates, globals }) => {
 
   return {
     code: { expr: closure.lf.expr, locals },
-    args,
+    args: nextArgs,
     returns,
     updates,
     globals,
@@ -247,12 +252,10 @@ const evalCase: Rule = ({ code, args, returns, updates, globals }) => {
     return null;
   }
 
-  returns = [{ alts: code.expr.alts, env: code.locals }, ...returns];
-
   return {
     code: { expr: code.expr.expr, locals: code.locals },
     args,
-    returns,
+    returns: [{ alts: code.expr.alts, env: code.locals }, ...returns],
     updates,
     globals,
   };
@@ -297,8 +300,7 @@ const returnConMatched: Rule = ({ code, args, returns, updates, globals }) => {
     return null;
   }
 
-  const rframe = returns[0];
-  returns = returns.slice(1);
+  const [rframe, ...nextReturns] = returns;
 
   const alt = takenAlt(rframe.alts, code.constr);
   if (alt === undefined || !ast.isAlgAlt(alt)) {
@@ -313,7 +315,7 @@ const returnConMatched: Rule = ({ code, args, returns, updates, globals }) => {
   return {
     code: { expr: alt.expr, locals },
     args,
-    returns,
+    returns: nextReturns,
     updates,
     globals,
   };
@@ -324,8 +326,7 @@ const returnConDefault: Rule = ({ code, args, returns, updates, globals }) => {
     return null;
   }
 
-  const rframe = returns[0];
-  returns = returns.slice(1);
+  const [rframe, ...nextReturns] = returns;
 
   const alt = takenAlt(rframe.alts, code.constr);
   if (alt === undefined || !ast.isDefAlt(alt)) {
@@ -335,7 +336,7 @@ const returnConDefault: Rule = ({ code, args, returns, updates, globals }) => {
   return {
     code: { expr: alt.expr, locals: rframe.env },
     args,
-    returns,
+    returns: nextReturns,
     updates,
     globals,
   };
@@ -352,8 +353,7 @@ const returnConDefaultWithBind: Rule = ({
     return null;
   }
 
-  const rframe = returns[0];
-  returns = returns.slice(1);
+  const [rframe, ...nextReturns] = returns;
 
   const alt = takenAlt(rframe.alts, code.constr);
   if (alt === undefined || !ast.isVarAlt(alt)) {
@@ -380,7 +380,7 @@ const returnConDefaultWithBind: Rule = ({
   return {
     code: { expr: alt.expr, locals },
     args,
-    returns,
+    returns: nextReturns,
     updates,
     globals,
   };
@@ -424,8 +424,7 @@ const returnIntMatched: Rule = ({ code, args, returns, updates, globals }) => {
     return null;
   }
 
-  const rframe = returns[0];
-  returns = returns.slice(1);
+  const [rframe, ...nextReturns] = returns;
 
   const alt = takenAlt(rframe.alts, code.int);
   if (alt === undefined || !ast.isPrimAlt(alt)) {
@@ -435,7 +434,7 @@ const returnIntMatched: Rule = ({ code, args, returns, updates, globals }) => {
   return {
     code: { expr: alt.expr, locals: rframe.env },
     args,
-    returns,
+    returns: nextReturns,
     updates,
     globals,
   };
@@ -446,8 +445,7 @@ const returnIntDefault: Rule = ({ code, args, returns, updates, globals }) => {
     return null;
   }
 
-  const rframe = returns[0];
-  returns = returns.slice(1);
+  const [rframe, ...nextReturns] = returns;
 
   const alt = takenAlt(rframe.alts, code.int);
   if (alt === undefined || !ast.isDefAlt(alt)) {
@@ -457,7 +455,7 @@ const returnIntDefault: Rule = ({ code, args, returns, updates, globals }) => {
   return {
     code: { expr: alt.expr, locals: rframe.env },
     args,
-    returns,
+    returns: nextReturns,
     updates,
     globals,
   };
@@ -474,8 +472,7 @@ const returnIntDefaultWithBind: Rule = ({
     return null;
   }
 
-  const rframe = returns[0];
-  returns = returns.slice(1);
+  const [rframe, ...nextReturns] = returns;
 
   const alt = takenAlt(rframe.alts, code.int);
   if (alt === undefined || !ast.isVarAlt(alt)) {
@@ -487,7 +484,7 @@ const returnIntDefaultWithBind: Rule = ({
   return {
     code: { expr: alt.expr, locals },
     args,
-    returns,
+    returns: nextReturns,
     updates,
     globals,
   };
@@ -543,15 +540,13 @@ const enterUpdatable: Rule = ({ code, args, returns, updates, globals }) => {
   code.addr.lf.free.forEach((v, i) => {
     locals[v] = code.addr.free[i];
   });
-
-  updates = [{ args, returns, addr: code.addr }, ...updates];
   code.addr.updating = true;
 
   return {
     code: { expr: code.addr.lf.expr, locals },
     args: [],
     returns: [],
-    updates,
+    updates: [{ args, returns, addr: code.addr }, ...updates],
     globals,
   };
 };
@@ -566,8 +561,7 @@ const returnConRestore: Rule = ({ code, args, returns, updates, globals }) => {
     return null;
   }
 
-  const uframe = updates[0];
-  updates = updates.slice(1);
+  const [uframe, ...nextUpdates] = updates;
 
   const free = Array.from({ length: code.args.length }, genFreshVar);
   uframe.addr.lf = {
@@ -586,7 +580,7 @@ const returnConRestore: Rule = ({ code, args, returns, updates, globals }) => {
     code,
     args: uframe.args,
     returns: uframe.returns,
-    updates,
+    updates: nextUpdates,
     globals,
   };
 };
@@ -601,8 +595,7 @@ const enterParApp: Rule = ({ code, args, updates, globals }) => {
     return null;
   }
 
-  const uframe = updates[0];
-  updates = updates.slice(1);
+  const [uframe, ...nextUpdates] = updates;
 
   const args1 = closure.lf.args.slice(0, args.length);
   const args2 = closure.lf.args.slice(args.length);
@@ -619,7 +612,7 @@ const enterParApp: Rule = ({ code, args, updates, globals }) => {
     code: { addr: closure },
     args: [...args, ...uframe.args],
     returns: uframe.returns,
-    updates,
+    updates: nextUpdates,
     globals,
   };
 };
