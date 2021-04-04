@@ -4,16 +4,20 @@ import { createInterpreter } from '~/interpreter';
 import { compose, Int, add, mul, traceInt } from '~/programs';
 
 const run = (program: ast.Program): void => {
-  console.group('Program:');
+  console.group('Program');
   console.log(prettyprint(program));
   console.groupEnd();
+  console.log();
 
-  console.group('Result:');
+  console.group('Result');
   const interpreter = createInterpreter(program);
   try {
     for (const _ of interpreter);
   } catch (err: unknown) {
-    console.error('Program exited with error: ', (err as Error).message);
+    console.error(
+      'Program exited with error: ',
+      err instanceof Error ? err.message : err
+    );
   }
   console.groupEnd();
 };
