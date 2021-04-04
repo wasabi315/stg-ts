@@ -51,3 +51,4 @@ Result
 - [Simon L Peyton Jones [July 1992] "Implementing lazy functional languages on stock hardware:
 the Spineless Tagless G-machine
 Version 2.5"](https://www.microsoft.com/en-us/research/wp-content/uploads/1992/04/spineless-tagless-gmachine.pdf)
+- [mizunashi-mana [April 2019] "STG Version 2.5 の動作"](https://mizunashi-mana.github.io/blog/posts/2019/04/haskell-old-stg-syntax/)
