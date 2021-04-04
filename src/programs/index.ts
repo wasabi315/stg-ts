@@ -170,3 +170,85 @@ export const traceInt: ast.Program = {
     },
   },
 };
+
+export const fact: ast.Program = {
+  fact: {
+    free: [],
+    updatable: false,
+    args: ['n'],
+    expr: {
+      rec: true,
+      binds: {
+        ['fact#']: {
+          free: ['fact#'],
+          updatable: false,
+          args: ['n#'],
+          expr: {
+            expr: {
+              var: 'n#',
+              args: [],
+            },
+            alts: [
+              {
+                literal: 0,
+                expr: 1,
+              },
+              {
+                expr: {
+                  expr: {
+                    prim: '-#',
+                    args: ['n#', 1],
+                  },
+                  alts: [
+                    {
+                      var: 'm#',
+                      expr: {
+                        expr: {
+                          var: 'fact#',
+                          args: ['m#'],
+                        },
+                        alts: [
+                          {
+                            var: 'fm#',
+                            expr: {
+                              prim: '*#',
+                              args: ['n#', 'fm#'],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+      expr: {
+        expr: {
+          var: 'n',
+          args: [],
+        },
+        alts: [
+          {
+            constr: 'Int#',
+            vars: ['n#'],
+            expr: {
+              expr: {
+                var: 'fact#',
+                args: ['n#'],
+              },
+              alts: [
+                {
+                  var: 'fn#',
+                  expr: Int('fn#'),
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  },
+};

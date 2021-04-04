@@ -1,7 +1,7 @@
 import * as ast from '~/ast';
 import { prettyprint } from '~/ast/prettyprint';
 import { createInterpreter } from '~/interpreter';
-import { compose, Int, add, mul, traceInt } from '~/programs';
+import { Int, traceInt, fact } from '~/programs';
 
 const run = (program: ast.Program): void => {
   console.group('Program');
@@ -31,49 +31,19 @@ const main = () => {
       expr: {
         rec: true,
         binds: {
-          ['2']: {
+          ['20']: {
             free: [],
             updatable: true,
             args: [],
-            expr: Int(2),
-          },
-          ['3']: {
-            free: [],
-            updatable: true,
-            args: [],
-            expr: Int(3),
-          },
-          ['5']: {
-            free: [],
-            updatable: true,
-            args: [],
-            expr: Int(5),
-          },
-          add2: {
-            free: ['2'],
-            updatable: false,
-            args: ['x'],
-            expr: {
-              var: 'add',
-              args: ['x', '2'],
-            },
-          },
-          mul3: {
-            free: ['3'],
-            updatable: false,
-            args: ['x'],
-            expr: {
-              var: 'mul',
-              args: ['x', '3'],
-            },
+            expr: Int(20),
           },
           res: {
-            free: ['add2', 'mul3', '5'],
+            free: ['20'],
             updatable: true,
             args: [],
             expr: {
-              var: 'compose',
-              args: ['add2', 'mul3', '5'],
+              var: 'fact',
+              args: ['20'],
             },
           },
         },
@@ -83,9 +53,7 @@ const main = () => {
         },
       },
     },
-    ...compose,
-    ...add,
-    ...mul,
+    ...fact,
     ...traceInt,
   };
 
