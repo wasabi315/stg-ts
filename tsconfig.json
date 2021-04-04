@@ -9,6 +9,7 @@
     "outDir": "dist",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "jsx": "react",
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,

@@ -1,3 +1,5 @@
+import React from 'react';
+import { render, Text, Box } from 'ink';
 import * as ast from '~/ast';
 import { prettyprint } from '~/ast/prettyprint';
 import { createInterpreter } from '~/interpreter';
@@ -19,15 +21,10 @@ const captureStdout = (fn: () => unknown): string => {
 };
 
 const run = (program: ast.Program): void => {
-  console.group('Program');
-  console.log(prettyprint(program));
-  console.groupEnd();
-  console.log();
-
+  // Run interpreter
   const interpreter = createInterpreter(program);
   let out: string;
   try {
-    // Run interpreter
     out = captureStdout(() => {
       for (const _ of interpreter);
     });
@@ -36,10 +33,17 @@ const run = (program: ast.Program): void => {
       err instanceof Error ? err.message : err
     }`;
   }
-  console.log('Result');
-  console.group();
-  console.log(out);
-  console.groupEnd();
+
+  render(
+    <Box flexDirection="column" marginBottom={1}>
+      <Box flexGrow={1} borderStyle="round" paddingX={2}>
+        <Text>{prettyprint(program)}</Text>
+      </Box>
+      <Box flexGrow={1} borderStyle="round" paddingX={2}>
+        <Text>{out.trim()}</Text>
+      </Box>
+    </Box>
+  );
 };
 
 const main = () => {
