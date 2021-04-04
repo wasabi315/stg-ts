@@ -168,7 +168,6 @@ const transition = (state: State): State | null => {
     const nextState = rule(state);
 
     if (nextState !== null) {
-      console.log(`rule applied: ${rule.name}`);
       return nextState;
     }
   }
@@ -495,31 +494,35 @@ const evalPrimApp: Rule = ({ code, args, returns, updates, globals }) => {
     return null;
   }
 
-  const [i1, i2] = vals(code.locals, {}, code.expr.args);
-  if (!isInt(i1) || !isInt(i2)) {
+  const ns = vals(code.locals, {}, code.expr.args);
+  if (!ns.every(isInt)) {
     return null;
   }
 
-  let i: Int;
+  let n: Int;
   switch (code.expr.prim) {
     case '+#':
-      i = i1 + i2;
+      n = ns[0] + ns[1];
       break;
     case '-#':
-      i = i1 - i2;
+      n = ns[0] - ns[1];
       break;
     case '*#':
-      i = i1 * i2;
+      n = ns[0] * ns[1];
       break;
     case '/#':
-      i = i1 / i2;
+      n = ns[0] / ns[1];
+      break;
+    case 'traceLit#':
+      n = ns[0];
+      console.log('traceLit#:', n);
       break;
     default:
       throw new Error(`Unknown primitive ${code.expr.prim}`);
   }
 
   return {
-    code: { int: i },
+    code: { int: n },
     args,
     returns,
     updates,

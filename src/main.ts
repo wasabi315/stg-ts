@@ -1,19 +1,21 @@
 import * as ast from '~/ast';
 import { prettyprint } from '~/ast/prettyprint';
 import { createInterpreter } from '~/interpreter';
-import { compose, Int, add, mul } from '~/programs';
+import { compose, Int, add, mul, traceInt } from '~/programs';
 
 const run = (program: ast.Program): void => {
+  console.group('Program:');
   console.log(prettyprint(program));
+  console.groupEnd();
+
+  console.group('Result:');
   const interpreter = createInterpreter(program);
   try {
-    for (const state of interpreter) {
-      console.dir(state, { depth: null });
-    }
+    for (const _ of interpreter);
   } catch (err: unknown) {
     console.error('Program exited with error: ', (err as Error).message);
-    process.exit(1);
   }
+  console.groupEnd();
 };
 
 const main = () => {
@@ -61,16 +63,26 @@ const main = () => {
               args: ['x', '3'],
             },
           },
+          res: {
+            free: ['add2', 'mul3', '5'],
+            updatable: true,
+            args: [],
+            expr: {
+              var: 'compose',
+              args: ['add2', 'mul3', '5'],
+            },
+          },
         },
         expr: {
-          var: 'compose',
-          args: ['add2', 'mul3', '5'],
+          var: 'traceInt',
+          args: ['res'],
         },
       },
     },
     ...compose,
     ...add,
     ...mul,
+    ...traceInt,
   };
 
   run(program);

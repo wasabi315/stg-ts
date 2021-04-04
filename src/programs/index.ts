@@ -146,3 +146,27 @@ export const compose: ast.Program = {
     },
   },
 };
+
+export const traceInt: ast.Program = {
+  traceInt: {
+    free: [],
+    updatable: false,
+    args: ['n'],
+    expr: {
+      expr: {
+        var: 'n',
+        args: [],
+      },
+      alts: [
+        {
+          constr: 'Int#',
+          vars: ['n#'],
+          expr: {
+            prim: 'traceLit#',
+            args: ['n#'],
+          },
+        },
+      ],
+    },
+  },
+};
