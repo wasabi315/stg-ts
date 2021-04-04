@@ -12,6 +12,7 @@ const run = (program: ast.Program): void => {
   console.group('Result');
   const interpreter = createInterpreter(program);
   try {
+    // Run interpreter
     for (const _ of interpreter);
   } catch (err: unknown) {
     console.error(
