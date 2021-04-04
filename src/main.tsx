@@ -36,9 +36,11 @@ const run = (program: ast.Program): void => {
 
   render(
     <Box flexDirection="column" marginBottom={1}>
-      <Box flexGrow={1} borderStyle="round" paddingX={2}>
+      <Text bold>Program</Text>
+      <Box flexGrow={1} borderStyle="round" paddingX={2} marginBottom={1}>
         <Text>{prettyprint(program)}</Text>
       </Box>
+      <Text bold>Result</Text>
       <Box flexGrow={1} borderStyle="round" paddingX={2}>
         <Text>{out.trim()}</Text>
       </Box>
