@@ -6,7 +6,7 @@ A toy stg interpreter in typescript
 $ yarn start
 ```
 
-```haskell
+```
 Program
   main = {} \u {} ->
       letrec
@@ -46,3 +46,8 @@ Program
 Result
   traceLit#: 2432902008176640000
 ```
+
+## References
+- [Simon L Peyton Jones [July 1992] "Implementing lazy functional languages on stock hardware:
+the Spineless Tagless G-machine
+Version 2.5"](https://www.microsoft.com/en-us/research/wp-content/uploads/1992/04/spineless-tagless-gmachine.pdf)
