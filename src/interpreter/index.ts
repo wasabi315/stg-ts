@@ -515,7 +515,7 @@ const evalPrimApp: Rule = ({ code, args, returns, updates, globals }) => {
       break;
     case 'traceLit#':
       n = ns[0];
-      console.log('traceLit#:', n);
+      console.log(n);
       break;
     default:
       throw new Error(`Unknown primitive ${code.expr.prim}`);
