@@ -14,8 +14,11 @@ const captureStdout = (fn: () => unknown): string => {
       out += chunk;
     }
   }) as typeof origWrite;
-  fn();
-  process.stdout.write = origWrite;
+  try {
+    fn();
+  } finally {
+    process.stdout.write = origWrite;
+  }
 
   return out;
 };
